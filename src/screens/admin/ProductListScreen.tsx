@@ -1,18 +1,22 @@
-import { LinkContainer } from 'react-router-bootstrap';
-import { Table, Button, Row, Col } from 'react-bootstrap';
-import { FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
-import { useParams } from 'react-router-dom';
-import Message from '../../components/Message';
-import Loader from '../../components/Loader';
-import Paginate from '../../components/Paginate';
+import { LinkContainer } from "react-router-bootstrap";
+import { Table, Button, Row, Col } from "react-bootstrap";
+import { FaEdit, FaPlus, FaTrash } from "react-icons/fa";
+import { useParams } from "react-router-dom";
+import Message from "../../components/Message";
+import Loader from "../../components/Loader";
+import Paginate from "../../components/Paginate";
 import {
   useGetProductsQuery,
   useDeleteProductMutation,
   useCreateProductMutation,
-} from '../../slices/productsApiSlice';
-import { toast } from 'react-toastify';
+} from "../../slices/productsApiSlice";
+import { toast } from "react-toastify";
+import { Product } from "../../types";
+import getErrorMessage from "../../utils/getErrorMessage";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import { SerializedError } from "@reduxjs/toolkit";
 
-const ProductListScreen = () => {
+const ProductListScreen: React.FC = () => {
   const { pageNumber } = useParams();
 
   const { data, isLoading, error, refetch } = useGetProductsQuery({
@@ -22,13 +26,15 @@ const ProductListScreen = () => {
   const [deleteProduct, { isLoading: loadingDelete }] =
     useDeleteProductMutation();
 
-  const deleteHandler = async (id) => {
-    if (window.confirm('Are you sure')) {
+  const deleteHandler = async (id: string) => {
+    if (window.confirm("Are you sure")) {
       try {
-        await deleteProduct(id);
+        await deleteProduct(id).unwrap();
         refetch();
       } catch (err) {
-        toast.error(err?.data?.message || err.error);
+        toast.error(
+          getErrorMessage(err as FetchBaseQueryError | SerializedError)
+        );
       }
     }
   };
@@ -37,24 +43,26 @@ const ProductListScreen = () => {
     useCreateProductMutation();
 
   const createProductHandler = async () => {
-    if (window.confirm('Are you sure you want to create a new product?')) {
+    if (window.confirm("Are you sure you want to create a new product?")) {
       try {
-        await createProduct();
+        await createProduct(undefined).unwrap();
         refetch();
       } catch (err) {
-        toast.error(err?.data?.message || err.error);
+        toast.error(
+          getErrorMessage(err as FetchBaseQueryError | SerializedError)
+        );
       }
     }
   };
 
   return (
     <>
-      <Row className='align-items-center'>
+      <Row className="align-items-center">
         <Col>
           <h1>Products</h1>
         </Col>
-        <Col className='text-end'>
-          <Button className='my-3' onClick={createProductHandler}>
+        <Col className="text-end">
+          <Button className="my-3" onClick={createProductHandler}>
             <FaPlus /> Create Product
           </Button>
         </Col>
@@ -65,10 +73,10 @@ const ProductListScreen = () => {
       {isLoading ? (
         <Loader />
       ) : error ? (
-        <Message variant='danger'>{error}</Message>
+        <Message variant="danger">{getErrorMessage(error)}</Message>
       ) : (
         <>
-          <Table striped bordered hover responsive className='table-sm'>
+          <Table striped bordered hover responsive className="table-sm">
             <thead>
               <tr>
                 <th>ID</th>
@@ -80,7 +88,7 @@ const ProductListScreen = () => {
               </tr>
             </thead>
             <tbody>
-              {data.products.map((product) => (
+              {data.products.map((product: Product) => (
                 <tr key={product._id}>
                   <td>{product._id}</td>
                   <td>{product.name}</td>
@@ -89,16 +97,16 @@ const ProductListScreen = () => {
                   <td>{product.brand}</td>
                   <td>
                     <LinkContainer to={`/admin/product/${product._id}/edit`}>
-                      <Button variant='light' className='btn-sm mx-2'>
+                      <Button variant="light" className="btn-sm mx-2">
                         <FaEdit />
                       </Button>
                     </LinkContainer>
                     <Button
-                      variant='danger'
-                      className='btn-sm'
+                      variant="danger"
+                      className="btn-sm"
                       onClick={() => deleteHandler(product._id)}
                     >
-                      <FaTrash style={{ color: 'white' }} />
+                      <FaTrash style={{ color: "white" }} />
                     </Button>
                   </td>
                 </tr>

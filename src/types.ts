@@ -47,3 +47,39 @@ export interface RootState {
 // export interface Auth {
 //   auth: CartState;
 // }
+
+//Screens & Component Interface
+export interface Product {
+  _id: string;
+  name: string;
+  image: string;
+  price: number;
+  category: string;
+  brand: string;
+}
+
+export interface Order {
+  _id: string;
+  user: {
+    name: string;
+  };
+  createdAt: string;
+  totalPrice: number;
+  isPaid: boolean;
+  paidAt?: string;
+  isDelivered: boolean;
+  deliveredAt?: string;
+}
+
+export interface ProductListResponse {
+  products: Product[];
+  pages: number;
+  page: number;
+}
+
+export interface User {
+  _id: string;
+  name: string;
+  email: string;
+  isAdmin: boolean;
+}
